@@ -290,23 +290,53 @@ const Videocall = () => {
         }
     };
 
-    // const startScreenSharing = async () => {
+
+    //     const startScreenSharing = async () => {
     //     try {
     //         console.log("Starting screen sharing...");
 
-    //         // First, unpublish the camera track to avoid the multiple video tracks error
+    //         // Check if browser is Safari
+    //         const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    //         console.log("Browser detected as Safari:", isSafari);
+
+    //         // Safari-specific configuration
+    //         let screenTrackConfig = {
+    //             encoderConfig: "1080p_1",
+    //             screenSourceType: "screen"
+    //         };
+
+    //         if (isSafari) {
+    //             // For Safari, we need simpler options with direct user gesture handling
+    //             console.log("Using Safari-specific screen sharing configuration");
+    //             // Remove additional configuration that might cause issues in Safari
+    //             delete screenTrackConfig.screenConfig;
+    //         } else {
+    //             // Use the enhanced configuration for other browsers
+    //             screenTrackConfig.screenConfig = {
+    //                 mandatory: {
+    //                     chromeMediaSource: 'desktop',
+    //                     chromeMediaSourceId: null,
+    //                     minWidth: 1920,
+    //                     maxWidth: 1920,
+    //                     minHeight: 1080,
+    //                     maxHeight: 1080
+    //                 },
+    //                 displaySurface: "monitor",
+    //                 logicalSurface: false,
+    //                 cursor: "always",
+    //                 updateInterval: 100
+    //             };
+    //         }
+
+    //         // Create screen track immediately (most important part for Safari)
+    //         console.log("Creating screen track with configuration:", screenTrackConfig);
+    //         const screenTrack = await AgoraRTC.createScreenVideoTrack(screenTrackConfig);
+
+    //         // Only after we have the screen track, unpublish camera track
     //         if (localVideoTrack) {
     //             console.log("Unpublishing camera track before screen sharing");
     //             await client.unpublish(localVideoTrack);
-    //             // Don't stop or close the camera track, just keep it for later
     //         }
-
-    //         // Create screen track
-    //         console.log("Creating screen track");
-    //         const screenTrack = await AgoraRTC.createScreenVideoTrack({
-    //             encoderConfig: "1080p_1",
-    //             screenSourceType: "screen"
-    //         });
 
     //         setLocalScreenTrack(screenTrack);
 
@@ -333,113 +363,20 @@ const Videocall = () => {
     //         await new Promise(resolve => setTimeout(resolve, 500));
 
     //         // Get the screen video stream
-    //         const screenStream = new MediaStream([screenTrack.getMediaStreamTrack()]);
-
-    //         // Get the microphone audio stream
-    //         const micStream = new MediaStream([localAudioTrack.getMediaStreamTrack()]);
-
-    //         // Start recording with all sources
-    //         console.log("Starting recording with background audio");
-    //         startRecording(screenStream, micStream, backgroundAudioStream);
-
-    //         setIsScreenSharing(true);
-    //         console.log("Screen sharing started!");
-
-    //         // Handle when screen sharing stops
-    //         screenTrack.on("track-ended", () => {
-    //             console.log("Screen track ended event received");
-    //             stopScreenSharing();
-    //         });
-
-    //     } catch (error) {
-    //         console.error("Error starting screen sharing:", error);
-    //         alert("Failed to start screen sharing: " + error.message);
-
-    //         // If screen sharing fails, republish camera track
-    //         if (localVideoTrack) {
-    //             try {
-    //                 console.log("Republishing camera track after screen sharing failure");
-    //                 await client.publish(localVideoTrack);
-    //             } catch (pubError) {
-    //                 console.error("Error republishing camera:", pubError);
-    //             }
-    //         }
-
-    //         // Also stop background audio if it started
-    //         stopBackgroundAudio();
-    //     }
-    // };
-
-    // In the startScreenSharing function, modify the screen track creation:
-
-    //19/3
-    // const startScreenSharing = async () => {
-    //     try {
-    //         console.log("Starting screen sharing...");
-
-    //         // First, unpublish the camera track to avoid the multiple video tracks error
-    //         if (localVideoTrack) {
-    //             console.log("Unpublishing camera track before screen sharing");
-    //             await client.unpublish(localVideoTrack);
-    //             // Don't stop or close the camera track, just keep it for later
-    //         }
-
-    //         // Create screen track with enhanced options for full screen capture
-    //         console.log("Creating screen track with full screen options");
-    //         const screenTrack = await AgoraRTC.createScreenVideoTrack({
-    //             encoderConfig: "1080p_1",
-    //             screenSourceType: "screen", // Ensure this is "screen" not "window"
-    //             // Set configuration to capture full screen
-    //             screenConfig: {
-    //                 mandatory: {
-    //                     chromeMediaSource: 'desktop',
-    //                     chromeMediaSourceId: null,
-    //                     minWidth: 1920,
-    //                     maxWidth: 1920,
-    //                     minHeight: 1080,
-    //                     maxHeight: 1080
-    //                 },
-    //                 displaySurface: "monitor", // This ensures full monitor is captured
-    //                 logicalSurface: false, // Include window decorations like the taskbar
-    //                 cursor: "always", // Always show cursor
-    //                 updateInterval: 100 // Frequent updates for smooth recording
-    //             }
-    //         });
-
-    //         setLocalScreenTrack(screenTrack);
-
-    //         // Publish screen track
-    //         console.log("Publishing screen track");
-    //         await client.publish(screenTrack);
-
-    //         // Show screen track in the container
-    //         if (screenContainerRef.current) {
-    //             screenContainerRef.current.innerHTML = "";
-    //             screenTrack.play(screenContainerRef.current);
-    //         }
-
-    //         // Even though we unpublished camera track, we can still show it locally
-    //         if (localVideoTrack && videoContainerRef.current) {
-    //             localVideoTrack.play(videoContainerRef.current);
-    //         }
-
-    //         // Start the background audio - MUST be started before recording
-    //         console.log("Starting background audio for recording");
-    //         const backgroundAudioStream = await startBackgroundAudio();
-
-    //         // Wait a moment to ensure background audio is playing
-    //         await new Promise(resolve => setTimeout(resolve, 500));
-
-    //         // Get the screen video stream with specific constraints
     //         const screenMediaTrack = screenTrack.getMediaStreamTrack();
 
-    //         // Force the track to capture the entire screen
-    //         if (screenMediaTrack.applyConstraints) {
-    //             await screenMediaTrack.applyConstraints({
-    //                 width: { ideal: window.screen.width },
-    //                 height: { ideal: window.screen.height },
-    //                 frameRate: { ideal: 30 }
-    //             });
+    //         // For non-Safari browsers, try to apply constraints for better quality
+    //         if (!isSafari && screenMediaTrack.applyConstraints) {
+    //             try {
+    //                 await screenMediaTrack.applyConstraints({
+    //                     width: { ideal: window.screen.width },
+    //                     height: { ideal: window.screen.height },
+    //                     frameRate: { ideal: 30 }
+    //                 });
+    //                 console.log("Applied additional constraints to screen track");
+    //             } catch (constraintError) {
+    //                 console.warn("Could not apply additional constraints:", constraintError);
+    //             }
     //         }
 
     //         const screenStream = new MediaStream([screenMediaTrack]);
@@ -480,129 +417,181 @@ const Videocall = () => {
     // };
 
     const startScreenSharing = async () => {
-    try {
-        console.log("Starting screen sharing...");
+        try {
+            console.log("Starting screen sharing...");
 
-        // Check if browser is Safari
-        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-        console.log("Browser detected as Safari:", isSafari);
+            // Detect Safari more reliably
+            const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ||
+                (navigator.userAgent.includes('AppleWebKit') && !navigator.userAgent.includes('Chrome'));
+            console.log("Browser detected as Safari:", isSafari);
 
-        // Safari-specific configuration
-        let screenTrackConfig = {
-            encoderConfig: "1080p_1",
-            screenSourceType: "screen"
-        };
-        
-        if (isSafari) {
-            // For Safari, we need simpler options with direct user gesture handling
-            console.log("Using Safari-specific screen sharing configuration");
-            // Remove additional configuration that might cause issues in Safari
-            delete screenTrackConfig.screenConfig;
-        } else {
-            // Use the enhanced configuration for other browsers
-            screenTrackConfig.screenConfig = {
-                mandatory: {
-                    chromeMediaSource: 'desktop',
-                    chromeMediaSourceId: null,
-                    minWidth: 1920,
-                    maxWidth: 1920,
-                    minHeight: 1080,
-                    maxHeight: 1080
-                },
-                displaySurface: "monitor",
-                logicalSurface: false,
-                cursor: "always",
-                updateInterval: 100
-            };
-        }
+            // Safari-specific implementation
+            if (isSafari) {
+                // Simple configuration for Safari
+                const screenTrack = await AgoraRTC.createScreenVideoTrack({
+                    // Minimal configuration for Safari
+                    encoderConfig: "1080p_1"
+                }, "disable"); // "disable" to not create audio track together
 
-        // Create screen track immediately (most important part for Safari)
-        console.log("Creating screen track with configuration:", screenTrackConfig);
-        const screenTrack = await AgoraRTC.createScreenVideoTrack(screenTrackConfig);
+                // Unpublish camera track first
+                if (localVideoTrack) {
+                    console.log("Unpublishing camera track before screen sharing");
+                    await client.unpublish(localVideoTrack);
+                }
 
-        // Only after we have the screen track, unpublish camera track
-        if (localVideoTrack) {
-            console.log("Unpublishing camera track before screen sharing");
-            await client.unpublish(localVideoTrack);
-        }
+                setLocalScreenTrack(screenTrack);
 
-        setLocalScreenTrack(screenTrack);
+                // Publish screen track
+                console.log("Publishing screen track");
+                await client.publish(screenTrack);
 
-        // Publish screen track
-        console.log("Publishing screen track");
-        await client.publish(screenTrack);
+                if (screenContainerRef.current) {
+                    screenContainerRef.current.innerHTML = "";
+                    screenTrack.play(screenContainerRef.current);
+                }
 
-        // Show screen track in the container
-        if (screenContainerRef.current) {
-            screenContainerRef.current.innerHTML = "";
-            screenTrack.play(screenContainerRef.current);
-        }
+                // Even though we unpublished camera track, we can still show it locally
+                if (localVideoTrack && videoContainerRef.current) {
+                    localVideoTrack.play(videoContainerRef.current);
+                }
 
-        // Even though we unpublished camera track, we can still show it locally
-        if (localVideoTrack && videoContainerRef.current) {
-            localVideoTrack.play(videoContainerRef.current);
-        }
+                // Start the background audio - MUST be started before recording
+                console.log("Starting background audio for recording");
+                const backgroundAudioStream = await startBackgroundAudio();
 
-        // Start the background audio - MUST be started before recording
-        console.log("Starting background audio for recording");
-        const backgroundAudioStream = await startBackgroundAudio();
-        
-        // Wait a moment to ensure background audio is playing
-        await new Promise(resolve => setTimeout(resolve, 500));
+                // Wait a moment to ensure background audio is playing
+                await new Promise(resolve => setTimeout(resolve, 500));
 
-        // Get the screen video stream
-        const screenMediaTrack = screenTrack.getMediaStreamTrack();
-        
-        // For non-Safari browsers, try to apply constraints for better quality
-        if (!isSafari && screenMediaTrack.applyConstraints) {
-            try {
-                await screenMediaTrack.applyConstraints({
-                    width: { ideal: window.screen.width },
-                    height: { ideal: window.screen.height },
-                    frameRate: { ideal: 30 }
+                // Get the screen video stream
+                const screenMediaTrack = screenTrack.getMediaStreamTrack();
+                const screenStream = new MediaStream([screenMediaTrack]);
+
+                // Get the microphone audio stream
+                const micStream = new MediaStream([localAudioTrack.getMediaStreamTrack()]);
+
+                // Start recording with all sources
+                console.log("Starting recording with background audio");
+                startRecording(screenStream, micStream, backgroundAudioStream);
+
+                setIsScreenSharing(true);
+                console.log("Screen sharing started!");
+
+                // Handle when screen sharing stops
+                screenTrack.on("track-ended", () => {
+                    console.log("Screen track ended event received");
+                    stopScreenSharing();
                 });
-                console.log("Applied additional constraints to screen track");
-            } catch (constraintError) {
-                console.warn("Could not apply additional constraints:", constraintError);
+            } else {
+                // Non-Safari browsers (Chrome, Edge, etc.)
+                console.log("Using configuration for non-Safari browsers");
+
+                // Create screen track with enhanced configuration for other browsers
+                const screenTrackConfig = {
+                    encoderConfig: "1080p_1",
+                    screenSourceType: "screen",
+                    screenConfig: {
+                        mandatory: {
+                            chromeMediaSource: 'desktop',
+                            chromeMediaSourceId: null,
+                            minWidth: 1920,
+                            maxWidth: 1920,
+                            minHeight: 1080,
+                            maxHeight: 1080
+                        },
+                        displaySurface: "monitor",
+                        logicalSurface: false,
+                        cursor: "always",
+                        updateInterval: 100
+                    }
+                };
+
+                console.log("Creating screen track with configuration:", screenTrackConfig);
+                const screenTrack = await AgoraRTC.createScreenVideoTrack(screenTrackConfig);
+
+                // Unpublish camera track
+                if (localVideoTrack) {
+                    console.log("Unpublishing camera track before screen sharing");
+                    await client.unpublish(localVideoTrack);
+                }
+
+                setLocalScreenTrack(screenTrack);
+
+                // Publish screen track
+                console.log("Publishing screen track");
+                await client.publish(screenTrack);
+
+                // Show screen track in the container
+                if (screenContainerRef.current) {
+                    screenContainerRef.current.innerHTML = "";
+                    screenTrack.play(screenContainerRef.current);
+                }
+
+                // Even though we unpublished camera track, we can still show it locally
+                if (localVideoTrack && videoContainerRef.current) {
+                    localVideoTrack.play(videoContainerRef.current);
+                }
+
+                // Start the background audio - MUST be started before recording
+                console.log("Starting background audio for recording");
+                const backgroundAudioStream = await startBackgroundAudio();
+
+                // Wait a moment to ensure background audio is playing
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                // Get the screen video stream
+                const screenMediaTrack = screenTrack.getMediaStreamTrack();
+
+                // Apply constraints for better quality
+                if (screenMediaTrack.applyConstraints) {
+                    try {
+                        await screenMediaTrack.applyConstraints({
+                            width: { ideal: window.screen.width },
+                            height: { ideal: window.screen.height },
+                            frameRate: { ideal: 30 }
+                        });
+                        console.log("Applied additional constraints to screen track");
+                    } catch (constraintError) {
+                        console.warn("Could not apply additional constraints:", constraintError);
+                    }
+                }
+
+                const screenStream = new MediaStream([screenMediaTrack]);
+
+                // Get the microphone audio stream
+                const micStream = new MediaStream([localAudioTrack.getMediaStreamTrack()]);
+
+                // Start recording with all sources
+                console.log("Starting recording with background audio");
+                startRecording(screenStream, micStream, backgroundAudioStream);
+
+                setIsScreenSharing(true);
+                console.log("Screen sharing started!");
+
+                // Handle when screen sharing stops
+                screenTrack.on("track-ended", () => {
+                    console.log("Screen track ended event received");
+                    stopScreenSharing();
+                });
             }
-        }
-        
-        const screenStream = new MediaStream([screenMediaTrack]);
-        
-        // Get the microphone audio stream
-        const micStream = new MediaStream([localAudioTrack.getMediaStreamTrack()]);
-        
-        // Start recording with all sources
-        console.log("Starting recording with background audio");
-        startRecording(screenStream, micStream, backgroundAudioStream);
+        } catch (error) {
+            console.error("Error starting screen sharing:", error);
+            alert("Failed to start screen sharing: " + error.message);
 
-        setIsScreenSharing(true);
-        console.log("Screen sharing started!");
-
-        // Handle when screen sharing stops
-        screenTrack.on("track-ended", () => {
-            console.log("Screen track ended event received");
-            stopScreenSharing();
-        });
-
-    } catch (error) {
-        console.error("Error starting screen sharing:", error);
-        alert("Failed to start screen sharing: " + error.message);
-
-        // If screen sharing fails, republish camera track
-        if (localVideoTrack) {
-            try {
-                console.log("Republishing camera track after screen sharing failure");
-                await client.publish(localVideoTrack);
-            } catch (pubError) {
-                console.error("Error republishing camera:", pubError);
+            // If screen sharing fails, republish camera track
+            if (localVideoTrack) {
+                try {
+                    console.log("Republishing camera track after screen sharing failure");
+                    await client.publish(localVideoTrack);
+                } catch (pubError) {
+                    console.error("Error republishing camera:", pubError);
+                }
             }
+
+            // Also stop background audio if it started
+            stopBackgroundAudio();
         }
-        
-        // Also stop background audio if it started
-        stopBackgroundAudio();
-    }
-};
+    };
+
     const stopScreenSharing = async () => {
         console.log("Stopping screen sharing...");
         try {
