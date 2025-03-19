@@ -1,10 +1,196 @@
+// import AgoraRTC from "agora-rtc-sdk-ng";
+// import { useEffect, useState } from "react";
+// import { Button, Container, Row, Col, Card } from "react-bootstrap";
+// import QuestionDisplay from "../QuestionDisplay/QuestionDisplay";
 
-// // // new 18/03/2025
+// const Videocall = () => {
+//     const [client, setClient] = useState(null);
+//     const [localVideoTrack, setLocalVideoTrack] = useState(null);
+//     const [joinState, setJoinState] = useState(false);
+//     const [mediaRecorder, setMediaRecorder] = useState(null);
+//     const [recordedChunks, setRecordedChunks] = useState([]);
+
+//     const appId = "967f29ebd0af4614a422d9cab0ef039c";
+//     const channel = "meet_demo";
+//     const token = null;
+//     const uid = 0;
+
+//     useEffect(() => {
+//         const agoraClient = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+//         setClient(agoraClient);
+
+//         agoraClient.on("user-published", async (user, mediaType) => {
+//             await agoraClient.subscribe(user, mediaType);
+//             console.log("Subscribe success");
+//             if (mediaType === "video") {
+//                 const remoteVideoTrack = user.videoTrack;
+//                 const remoteContainer = document.createElement("div");
+//                 remoteContainer.id = `player-${user.uid}`;
+//                 remoteContainer.className = "w-64 h-48 bg-black mt-2";
+//                 document.getElementById("remote-container").appendChild(remoteContainer);
+//                 remoteVideoTrack.play(remoteContainer.id);
+//             }
+//         });
+
+//         agoraClient.on("user-unpublished", (user) => {
+//             console.log("User unpublished:", user);
+//             const remoteContainer = document.getElementById(`player-${user.uid}`);
+//             if (remoteContainer) {
+//                 remoteContainer.remove();
+//             }
+//         });
+
+//         return () => {
+//             leaveChannel();
+//         };
+//     }, []);
+
+//     const createLocalVideoTrack = async () => {
+//         try {
+//             const videoTrack = await AgoraRTC.createCameraVideoTrack();
+//             setLocalVideoTrack(videoTrack);
+//             return videoTrack;
+//         } catch (error) {
+//             console.error("Error creating video track:", error);
+//             throw error;
+//         }
+//     };
+
+//     const startRecording = async (stream) => {
+//         try {
+//             const recorder = new MediaRecorder(stream);
+//             let chunks = [];
+
+//             recorder.ondataavailable = (event) => {
+//                 if (event.data.size > 0) {
+//                     chunks.push(event.data);
+//                 }
+//             };
+
+//             recorder.onstop = () => {
+//                 setRecordedChunks(chunks);
+//                 uploadRecording(chunks);
+//             };
+
+//             recorder.start();
+//             setMediaRecorder(recorder);
+//         } catch (error) {
+//             console.error("Error starting recording:", error);
+//         }
+//     };
+
+//     const joinChannel = async () => {
+//         try {
+//             await client.join(appId, channel, token, uid);
+
+//             const [audioTrack, videoTrack] = await Promise.all([
+//                 AgoraRTC.createMicrophoneAudioTrack(),
+//                 AgoraRTC.createCameraVideoTrack(),
+//             ]);
+
+//             await client.publish([audioTrack, videoTrack]);
+
+//             setLocalVideoTrack(videoTrack);
+//             setJoinState(true);
+
+//             const screenContainer = document.querySelector(".screen");
+//             screenContainer.innerHTML = "";
+//             videoTrack.play(screenContainer);
+
+//             // Start recording with both audio and video
+//             const stream = new MediaStream([
+//                 videoTrack.getMediaStreamTrack(),
+//                 audioTrack.getMediaStreamTrack(),
+//             ]);
+//             startRecording(stream);
+
+//             console.log("Join and publish success!");
+//         } catch (error) {
+//             console.error("Error joining channel:", error);
+//         }
+//     };
+
+//     const leaveChannel = async () => {
+//         if (joinState) {
+//             if (localVideoTrack) {
+//                 localVideoTrack.stop();
+//                 localVideoTrack.close();
+//                 setLocalVideoTrack(null);
+//             }
+
+//             const remoteContainer = document.getElementById("remote-container");
+//             if (remoteContainer) {
+//                 remoteContainer.innerHTML = ""; // Only modify if it exists
+//             }
+
+//             await client.leave();
+//             console.log("Left the channel.");
+//             setJoinState(false);
+
+//             // Stop recording
+//             if (mediaRecorder) {
+//                 mediaRecorder.stop();
+//             }
+//         }
+//     };
+
+//     const uploadRecording = async (chunks) => {
+//         try {
+//             const blob = new Blob(chunks, { type: "video/webm" });
+//             const formData = new FormData();
+//             formData.append("video", blob, "recording.webm");
+
+//             const response = await fetch("http://localhost:9000/api/videos/upload", {
+//                 method: "POST",
+//                 body: formData,
+//             });
+
+//             if (response.ok) {
+//                 console.log("Video uploaded successfully");
+//             } else {
+//                 console.error("Video upload failed");
+//             }
+//         } catch (error) {
+//             console.error("Error uploading video:", error);
+//         }
+//     };
+
+
+//     return (
+//         <Container className="p-4">
+//             <h2 className="text-center text-primary mb-4">Agora Web SDK Video Call</h2>
+//             <Row className="justify-content-center mb-3">
+//                 <Col xs="auto">
+//                     <Button variant="success" onClick={joinChannel} disabled={joinState}>
+//                         Join Channel
+//                     </Button>
+//                 </Col>
+//                 <Col xs="auto">
+//                     <Button variant="danger" onClick={leaveChannel} disabled={!joinState}>
+//                         Leave Channel
+//                     </Button>
+//                 </Col>
+//             </Row>
+
+//             <div className="mt-4 text-center">
+//                 {joinState && <p className="text-success">Connected to channel! Your video is active.</p>}
+//                 <div className="screen mx-auto border rounded bg-light mt-3" style={{ width: '700px', height: '400px' }}></div>
+//             </div>
+
+//             <QuestionDisplay />
+//         </Container>
+//     );
+// };
+
+// export default Videocall;
+
+
+// 12/3/25 new
+
 // import AgoraRTC from "agora-rtc-sdk-ng";
 // import { useEffect, useState, useRef } from "react";
 // import { Button, Container, Row, Col } from "react-bootstrap";
 // import QuestionDisplay from "../QuestionDisplay/QuestionDisplay";
-// import backAudio from "../../assets/audio/country-2-302328.mp3"
 
 // const Videocall = () => {
 //     const [client, setClient] = useState(null);
@@ -18,12 +204,6 @@
 //     const [isRecording, setIsRecording] = useState(false);
 //     const [recordingLink, setRecordingLink] = useState(null);
 
-//     // Audio player reference
-//     const audioRef = useRef(new Audio(backAudio));
-//     const audioContextRef = useRef(null);
-//     const audioSourceRef = useRef(null);
-//     const audioDestinationRef = useRef(null);
-
 //     // Use refs for DOM elements to prevent feedback loop
 //     const screenContainerRef = useRef(null);
 //     const videoContainerRef = useRef(null);
@@ -33,14 +213,9 @@
 //     const token = null;
 //     const uid = 0;
 
-
 //     useEffect(() => {
 //         const agoraClient = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
 //         setClient(agoraClient);
-
-//         // Set up audio element
-//         audioRef.current.loop = true;
-//         audioRef.current.volume = 0.5;
 
 //         agoraClient.on("user-published", async (user, mediaType) => {
 //             await agoraClient.subscribe(user, mediaType);
@@ -65,161 +240,17 @@
 
 //         return () => {
 //             leaveChannel();
-//             // Clean up audio
-//             stopBackgroundAudio();
 //         };
 //     }, []);
 
-//     const setupIntervalAudio = () => {
+//     const startRecording = async (stream) => {
 //         try {
-//             const audioEl = audioRef.current;
-
-//             // Create audio context
-//             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-//             audioContextRef.current = audioContext;
-
-//             // Create media element source
-//             const source = audioContext.createMediaElementSource(audioEl);
-//             audioSourceRef.current = source;
-
-//             // Create destination for recording
-//             const destination = audioContext.createMediaStreamDestination();
-//             audioDestinationRef.current = destination;
-
-//             // Connect source to both speakers and recording destination
-//             source.connect(audioContext.destination); // For speakers
-//             source.connect(destination); // For recording
-
-//             // Start playing the audio
-//             audioEl.play();
-
-//             // Set up interval to toggle audio playback every 5 seconds
-//             const intervalId = setInterval(() => {
-//                 if (audioEl.paused) {
-//                     console.log("Resuming background audio");
-//                     audioEl.play();
-//                 } else {
-//                     console.log("Pausing background audio");
-//                     audioEl.pause();
-//                 }
-//             }, 5000); // 5 seconds
-
-//             // Store the interval ID for cleanup
-//             return {
-//                 intervalId,
-//                 audioStream: destination.stream
-//             };
-//         } catch (error) {
-//             console.error("Error setting up interval audio:", error);
-//             return { intervalId: null, audioStream: null };
-//         }
-//     };
-
-//     const startBackgroundAudio = async () => {
-//         try {
-//             // Start the interval-based audio playback
-//             const { intervalId, audioStream } = setupIntervalAudio();
-
-//             // Store the interval ID for cleanup
-//             audioRef.current.intervalId = intervalId;
-
-//             console.log("Background audio started with 5-second intervals");
-
-//             // Log audio tracks to verify
-//             if (audioStream) {
-//                 console.log("Background audio stream created with tracks:",
-//                     audioStream.getAudioTracks().length);
-//                 audioStream.getAudioTracks().forEach((track, i) => {
-//                     console.log(`Background audio track ${i}:`, track.label, track.enabled);
-//                 });
-//             }
-
-//             return audioStream;
-//         } catch (error) {
-//             console.error("Error starting background audio:", error);
-//             return null;
-//         }
-//     };
-
-//     const stopBackgroundAudio = () => {
-//         try {
-//             const audioEl = audioRef.current;
-
-//             // Clear the interval if it exists
-//             if (audioEl.intervalId) {
-//                 clearInterval(audioEl.intervalId);
-//                 audioEl.intervalId = null;
-//             }
-
-//             audioEl.pause();
-//             audioEl.currentTime = 0;
-//             console.log("Background audio stopped and interval cleared");
-
-//             // Clean up audio context connections
-//             if (audioSourceRef.current) {
-//                 audioSourceRef.current.disconnect();
-//                 audioSourceRef.current = null;
-//             }
-
-//             if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-//                 audioContextRef.current.close();
-//                 audioContextRef.current = null;
-//             }
-
-//             audioDestinationRef.current = null;
-//         } catch (error) {
-//             console.error("Error stopping background audio:", error);
-//         }
-//     };
-
-//     const startRecording = async (videoStream, audioStream, backgroundAudioStream) => {
-//         try {
-//             // Create audio mixer for multiple audio sources
-//             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-//             const audioDestination = audioContext.createMediaStreamDestination();
-
-//             // Get all video tracks from the screen capture
-//             const videoTracks = videoStream.getVideoTracks();
-
-//             // Get microphone audio track if available
-//             const micTracks = audioStream.getAudioTracks();
-//             if (micTracks.length > 0) {
-//                 console.log("Adding microphone audio to recording");
-//                 const micSource = audioContext.createMediaStreamSource(new MediaStream([micTracks[0]]));
-//                 micSource.connect(audioDestination);
-//             }
-
-//             // Add background audio track if available
-//             if (backgroundAudioStream && backgroundAudioStream.getAudioTracks().length > 0) {
-//                 console.log("Adding background audio to recording mixer");
-//                 const backgroundSource = audioContext.createMediaStreamSource(backgroundAudioStream);
-//                 backgroundSource.connect(audioDestination);
-//             } else {
-//                 console.warn("No background audio tracks available for recording");
-//             }
-
-//             // Create a combined stream with video track and mixed audio
-//             const combinedTracks = [
-//                 ...videoTracks,
-//                 ...audioDestination.stream.getAudioTracks()
-//             ];
-
-//             // Log all tracks being used for recording
-//             console.log(`Recording with ${combinedTracks.length} tracks:`);
-//             combinedTracks.forEach((track, index) => {
-//                 console.log(`Track ${index}: ${track.kind} - ${track.readyState} - ${track.label}`);
-//             });
-
-//             const combinedStream = new MediaStream(combinedTracks);
-
-//             // Set up media recorder with appropriate options
 //             const options = {
 //                 mimeType: 'video/webm;codecs=vp9',
-//                 videoBitsPerSecond: 3000000, // 3 Mbps
-//                 audioBitsPerSecond: 128000   // 128 kbps for audio
+//                 videoBitsPerSecond: 3000000 // 3 Mbps
 //             };
 
-//             const recorder = new MediaRecorder(combinedStream, options);
+//             const recorder = new MediaRecorder(stream, options);
 //             let chunks = [];
 
 //             recorder.ondataavailable = (event) => {
@@ -236,25 +267,22 @@
 //                     const blob = new Blob(chunks, { type: "video/webm" });
 //                     setRecordedChunks(chunks);
 
-//                     // Create download link
+//                     // Create download link but don't auto-download
 //                     const url = URL.createObjectURL(blob);
 //                     setRecordingLink(url);
+
+//                     // Note: Auto-download code removed from here
 
 //                     // Upload if your server is ready
 //                     uploadRecording(chunks);
 //                 }
-
-//                 // Close audio context used for recording
-//                 if (audioContext && audioContext.state !== 'closed') {
-//                     audioContext.close().catch(e => console.error("Error closing audio context:", e));
-//                 }
 //             };
 
-//             // Start recording with 1-second data chunks
+//             // Set up data collection at 1-second intervals
 //             recorder.start(1000);
 //             setMediaRecorder(recorder);
 //             setIsRecording(true);
-//             console.log("Recording started with background audio");
+//             console.log("Recording started");
 //         } catch (error) {
 //             console.error("Error starting recording:", error);
 //             alert("Failed to start recording: " + error.message);
@@ -290,10 +318,6 @@
 //         }
 //     };
 
-//     // In the startScreenSharing function, modify the screen track creation:
-
-//     //19/3
-    
 //     const startScreenSharing = async () => {
 //         try {
 //             console.log("Starting screen sharing...");
@@ -305,26 +329,11 @@
 //                 // Don't stop or close the camera track, just keep it for later
 //             }
 
-//             // Create screen track with enhanced options for full screen capture
-//             console.log("Creating screen track with full screen options");
+//             // Create screen track
+//             console.log("Creating screen track");
 //             const screenTrack = await AgoraRTC.createScreenVideoTrack({
 //                 encoderConfig: "1080p_1",
-//                 screenSourceType: "screen", // Ensure this is "screen" not "window"
-//                 // Set configuration to capture full screen
-//                 screenConfig: {
-//                     mandatory: {
-//                         chromeMediaSource: 'desktop',
-//                         chromeMediaSourceId: null,
-//                         minWidth: 1920,
-//                         maxWidth: 1920,
-//                         minHeight: 1080,
-//                         maxHeight: 1080
-//                     },
-//                     displaySurface: "monitor", // This ensures full monitor is captured
-//                     logicalSurface: false, // Include window decorations like the taskbar
-//                     cursor: "always", // Always show cursor
-//                     updateInterval: 100 // Frequent updates for smooth recording
-//                 }
+//                 screenSourceType: "screen"
 //             });
 
 //             setLocalScreenTrack(screenTrack);
@@ -344,33 +353,12 @@
 //                 localVideoTrack.play(videoContainerRef.current);
 //             }
 
-//             // Start the background audio - MUST be started before recording
-//             console.log("Starting background audio for recording");
-//             const backgroundAudioStream = await startBackgroundAudio();
-
-//             // Wait a moment to ensure background audio is playing
-//             await new Promise(resolve => setTimeout(resolve, 500));
-
-//             // Get the screen video stream with specific constraints
-//             const screenMediaTrack = screenTrack.getMediaStreamTrack();
-
-//             // Force the track to capture the entire screen
-//             if (screenMediaTrack.applyConstraints) {
-//                 await screenMediaTrack.applyConstraints({
-//                     width: { ideal: window.screen.width },
-//                     height: { ideal: window.screen.height },
-//                     frameRate: { ideal: 30 }
-//                 });
-//             }
-
-//             const screenStream = new MediaStream([screenMediaTrack]);
-
-//             // Get the microphone audio stream
-//             const micStream = new MediaStream([localAudioTrack.getMediaStreamTrack()]);
-
-//             // Start recording with all sources
-//             console.log("Starting recording with background audio");
-//             startRecording(screenStream, micStream, backgroundAudioStream);
+//             // Start recording with screen and audio
+//             const stream = new MediaStream([
+//                 screenTrack.getMediaStreamTrack(),
+//                 localAudioTrack.getMediaStreamTrack()
+//             ]);
+//             startRecording(stream);
 
 //             setIsScreenSharing(true);
 //             console.log("Screen sharing started!");
@@ -394,95 +382,83 @@
 //                     console.error("Error republishing camera:", pubError);
 //                 }
 //             }
-
-//             // Also stop background audio if it started
-//             stopBackgroundAudio();
 //         }
 //     };
-    
+
 //     const stopScreenSharing = async () => {
 //         console.log("Stopping screen sharing...");
 //         try {
-//             // Stop background audio
-//             stopBackgroundAudio();
-
 //             if (localScreenTrack) {
 //                 await client.unpublish(localScreenTrack);
 //                 localScreenTrack.stop();
 //                 localScreenTrack.close();
 //                 setLocalScreenTrack(null);
 //             }
-
+    
 //             if (localVideoTrack) {
 //                 await client.publish(localVideoTrack);
 //                 if (videoContainerRef.current) {
 //                     localVideoTrack.play(videoContainerRef.current);
 //                 }
 //             }
-
+    
 //             if (mediaRecorder && mediaRecorder.state !== "inactive") {
 //                 mediaRecorder.stop();
 //                 setMediaRecorder(null);
 //             }
-
+    
 //             setIsScreenSharing(false);
 //             setIsRecording(false);
-
+    
 //             // Show Download button
 //             if (recordedChunks.length > 0) {
 //                 const blob = new Blob(recordedChunks, { type: "video/webm" });
 //                 setRecordingLink(URL.createObjectURL(blob));
 //             }
-
+    
 //             console.log("Screen sharing stopped successfully!");
 //         } catch (error) {
 //             console.error("Error stopping screen sharing:", error);
 //             alert("Error stopping screen sharing: " + error.message);
-
-//             // Make sure audio stops even if there's an error
-//             stopBackgroundAudio();
 //         }
 //     };
-
+    
 //     const leaveChannel = async () => {
 //         if (joinState) {
 //             if (isScreenSharing) {
 //                 await stopScreenSharing();
 //             }
-
+    
 //             if (localVideoTrack) {
 //                 localVideoTrack.stop();
 //                 localVideoTrack.close();
 //                 setLocalVideoTrack(null);
 //             }
-
+    
 //             if (localAudioTrack) {
 //                 localAudioTrack.stop();
 //                 localAudioTrack.close();
 //                 setLocalAudioTrack(null);
 //             }
-
+    
 //             const remoteContainer = document.getElementById("remote-container");
 //             if (remoteContainer) {
 //                 remoteContainer.innerHTML = "";
 //             }
-
+    
 //             await client.leave();
 //             console.log("Left the channel.");
 //             setJoinState(false);
-
+    
 //             if (mediaRecorder && mediaRecorder.state !== "inactive") {
 //                 mediaRecorder.stop();
 //             }
-
+    
 //             // Hide Download button when Camera Off is clicked
 //             setRecordingLink(null);
-
-//             // Make sure audio is stopped
-//             stopBackgroundAudio();
 //         }
 //     };
-
+    
 //     const uploadRecording = async (chunks) => {
 //         try {
 //             const blob = new Blob(chunks, { type: "video/webm" });
@@ -525,6 +501,7 @@
 //             <Row className="justify-content-center mb-3">
 //                 <Col xs="auto">
 //                     <Button variant="success" onClick={joinChannel} disabled={joinState}>
+//                         {/* Join Channel */}
 //                         Camera On
 //                     </Button>
 //                 </Col>
@@ -538,16 +515,25 @@
 //                         variant="warning"
 //                         onClick={stopScreenSharing}
 //                         disabled={!isScreenSharing}
-//                         style={{ fontWeight: 'bold' }}
+//                         style={{ fontWeight: 'bold' }} // Make it more visible
 //                     >
 //                         Stop Screen Sharing
 //                     </Button>
 //                 </Col>
 //                 <Col xs="auto">
 //                     <Button variant="danger" onClick={leaveChannel} disabled={!joinState}>
+//                         {/* Leave Channel */}
 //                         Camera Off
 //                     </Button>
 //                 </Col>
+//                 {/* {recordingLink && (
+//                     <Col xs="auto">
+//                         <Button variant="success" onClick={downloadRecording}>
+//                             Download Recording
+//                         </Button>
+//                     </Col>
+//                 )} */}
+
 //                 {recordingLink && isScreenSharing === false && (
 //                     <Col xs="auto">
 //                         <Button variant="success" onClick={downloadRecording}>
@@ -558,6 +544,10 @@
 //             </Row>
 
 //             <div className="mt-4 text-center">
+//                 {/* {joinState && <p className="text-success">Connected to channel!</p>}
+//                 {isScreenSharing && <p className="text-info">Screen sharing active</p>}
+//                 {isRecording && <p className="text-danger">Recording in progress...</p>} */}
+
 //                 <Row>
 //                     {/* Camera feed - always visible */}
 //                     <Col md={8}>
@@ -585,7 +575,7 @@
 // export default Videocall;
 
 
-
+// // new 18/03/2025
 import AgoraRTC from "agora-rtc-sdk-ng";
 import { useEffect, useState, useRef } from "react";
 import { Button, Container, Row, Col } from "react-bootstrap";
@@ -603,7 +593,6 @@ const Videocall = () => {
     const [isScreenSharing, setIsScreenSharing] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
     const [recordingLink, setRecordingLink] = useState(null);
-    const [isSafari, setIsSafari] = useState(false);
 
     // Audio player reference
     const audioRef = useRef(new Audio(backAudio));
@@ -620,12 +609,8 @@ const Videocall = () => {
     const token = null;
     const uid = 0;
 
-    useEffect(() => {
-        // Detect Safari browser
-        const isSafariBrowser = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-        setIsSafari(isSafariBrowser);
-        console.log("Browser detected - Safari:", isSafariBrowser);
 
+    useEffect(() => {
         const agoraClient = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
         setClient(agoraClient);
 
@@ -665,7 +650,7 @@ const Videocall = () => {
         try {
             const audioEl = audioRef.current;
 
-            // Create audio context with Safari compatibility
+            // Create audio context
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             audioContextRef.current = audioContext;
 
@@ -682,13 +667,13 @@ const Videocall = () => {
             source.connect(destination); // For recording
 
             // Start playing the audio
-            audioEl.play().catch(err => console.error("Error playing audio:", err));
+            audioEl.play();
 
             // Set up interval to toggle audio playback every 5 seconds
             const intervalId = setInterval(() => {
                 if (audioEl.paused) {
                     console.log("Resuming background audio");
-                    audioEl.play().catch(err => console.error("Error resuming audio:", err));
+                    audioEl.play();
                 } else {
                     console.log("Pausing background audio");
                     audioEl.pause();
@@ -753,7 +738,8 @@ const Videocall = () => {
             }
 
             if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-                audioContextRef.current.close().catch(e => console.error("Error closing audio context:", e));
+                audioContextRef.current.close();
+                audioContextRef.current = null;
             }
 
             audioDestinationRef.current = null;
@@ -803,30 +789,11 @@ const Videocall = () => {
             const combinedStream = new MediaStream(combinedTracks);
 
             // Set up media recorder with appropriate options
-            // Safari doesn't support VP9, we need to use different codecs based on browser
-            let options;
-            
-            if (isSafari) {
-                // Safari supports H.264 in MP4 container
-                options = {
-                    mimeType: 'video/mp4',
-                    videoBitsPerSecond: 3000000, // 3 Mbps
-                    audioBitsPerSecond: 128000   // 128 kbps for audio
-                };
-            } else {
-                // Chrome and others support webm/vp8
-                options = {
-                    mimeType: 'video/webm;codecs=vp8',
-                    videoBitsPerSecond: 3000000, // 3 Mbps
-                    audioBitsPerSecond: 128000   // 128 kbps for audio
-                };
-            }
-
-            // Check if the browser supports the specified mimeType
-            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-                console.warn(`${options.mimeType} is not supported, using default recorder options`);
-                options = {}; // Use browser default
-            }
+            const options = {
+                mimeType: 'video/webm;codecs=vp9',
+                videoBitsPerSecond: 3000000, // 3 Mbps
+                audioBitsPerSecond: 128000   // 128 kbps for audio
+            };
 
             const recorder = new MediaRecorder(combinedStream, options);
             let chunks = [];
@@ -842,9 +809,7 @@ const Videocall = () => {
                 console.log("Recorder stopped, creating file from chunks:", chunks.length);
 
                 if (chunks.length > 0) {
-                    // Determine the correct MIME type for the output
-                    const mimeType = isSafari ? "video/mp4" : "video/webm";
-                    const blob = new Blob(chunks, { type: mimeType });
+                    const blob = new Blob(chunks, { type: "video/webm" });
                     setRecordedChunks(chunks);
 
                     // Create download link
@@ -852,7 +817,7 @@ const Videocall = () => {
                     setRecordingLink(url);
 
                     // Upload if your server is ready
-                    uploadRecording(chunks, mimeType);
+                    uploadRecording(chunks);
                 }
 
                 // Close audio context used for recording
@@ -901,6 +866,10 @@ const Videocall = () => {
         }
     };
 
+    // In the startScreenSharing function, modify the screen track creation:
+
+    //19/3
+    
     const startScreenSharing = async () => {
         try {
             console.log("Starting screen sharing...");
@@ -912,39 +881,27 @@ const Videocall = () => {
                 // Don't stop or close the camera track, just keep it for later
             }
 
-            // Safari requires different screen sharing setup
-            let screenTrack;
-            
-            if (isSafari) {
-                // Safari specific screen sharing - simpler options
-                screenTrack = await AgoraRTC.createScreenVideoTrack({
-                    encoderConfig: "1080p_1"
-                }).catch(err => {
-                    console.error("Safari screen sharing error:", err);
-                    throw new Error("Screen sharing not fully supported in Safari. Please try Chrome or Edge browser.");
-                });
-            } else {
-                // Chrome/Edge/Firefox screen sharing with enhanced options
-                screenTrack = await AgoraRTC.createScreenVideoTrack({
-                    encoderConfig: "1080p_1",
-                    screenSourceType: "screen", // Ensure this is "screen" not "window"
-                    // Set configuration to capture full screen
-                    screenConfig: {
-                        mandatory: {
-                            chromeMediaSource: 'desktop',
-                            chromeMediaSourceId: null,
-                            minWidth: 1920,
-                            maxWidth: 1920,
-                            minHeight: 1080,
-                            maxHeight: 1080
-                        },
-                        displaySurface: "monitor", // This ensures full monitor is captured
-                        logicalSurface: false, // Include window decorations like the taskbar
-                        cursor: "always", // Always show cursor
-                        updateInterval: 100 // Frequent updates for smooth recording
-                    }
-                });
-            }
+            // Create screen track with enhanced options for full screen capture
+            console.log("Creating screen track with full screen options");
+            const screenTrack = await AgoraRTC.createScreenVideoTrack({
+                encoderConfig: "1080p_1",
+                screenSourceType: "screen", // Ensure this is "screen" not "window"
+                // Set configuration to capture full screen
+                screenConfig: {
+                    mandatory: {
+                        chromeMediaSource: 'desktop',
+                        chromeMediaSourceId: null,
+                        minWidth: 1920,
+                        maxWidth: 1920,
+                        minHeight: 1080,
+                        maxHeight: 1080
+                    },
+                    displaySurface: "monitor", // This ensures full monitor is captured
+                    logicalSurface: false, // Include window decorations like the taskbar
+                    cursor: "always", // Always show cursor
+                    updateInterval: 100 // Frequent updates for smooth recording
+                }
+            });
 
             setLocalScreenTrack(screenTrack);
 
@@ -972,19 +929,14 @@ const Videocall = () => {
 
             // Get the screen video stream with specific constraints
             const screenMediaTrack = screenTrack.getMediaStreamTrack();
-            
-            // Apply constraints if supported (may not work in Safari)
-            try {
-                if (screenMediaTrack.applyConstraints) {
-                    await screenMediaTrack.applyConstraints({
-                        width: { ideal: window.screen.width },
-                        height: { ideal: window.screen.height },
-                        frameRate: { ideal: 30 }
-                    });
-                }
-            } catch (constraintError) {
-                console.warn("Could not apply constraints to screen track:", constraintError);
-                // Continue without constraints
+
+            // Force the track to capture the entire screen
+            if (screenMediaTrack.applyConstraints) {
+                await screenMediaTrack.applyConstraints({
+                    width: { ideal: window.screen.width },
+                    height: { ideal: window.screen.height },
+                    frameRate: { ideal: 30 }
+                });
             }
 
             const screenStream = new MediaStream([screenMediaTrack]);
@@ -1007,13 +959,7 @@ const Videocall = () => {
 
         } catch (error) {
             console.error("Error starting screen sharing:", error);
-            
-            // More helpful error message for Safari users
-            if (isSafari) {
-                alert("Screen sharing in Safari is limited. For best experience, please use Chrome or Edge. Error: " + error.message);
-            } else {
-                alert("Failed to start screen sharing: " + error.message);
-            }
+            alert("Failed to start screen sharing: " + error.message);
 
             // If screen sharing fails, republish camera track
             if (localVideoTrack) {
@@ -1060,9 +1006,7 @@ const Videocall = () => {
 
             // Show Download button
             if (recordedChunks.length > 0) {
-                // Use appropriate MIME type based on browser
-                const mimeType = isSafari ? "video/mp4" : "video/webm";
-                const blob = new Blob(recordedChunks, { type: mimeType });
+                const blob = new Blob(recordedChunks, { type: "video/webm" });
                 setRecordingLink(URL.createObjectURL(blob));
             }
 
@@ -1115,14 +1059,11 @@ const Videocall = () => {
         }
     };
 
-    const uploadRecording = async (chunks, mimeType = "video/webm") => {
+    const uploadRecording = async (chunks) => {
         try {
-            const blob = new Blob(chunks, { type: mimeType });
+            const blob = new Blob(chunks, { type: "video/webm" });
             const formData = new FormData();
-            
-            // Use appropriate file extension based on MIME type
-            const fileExtension = mimeType.includes("mp4") ? "mp4" : "webm";
-            formData.append("video", blob, `recording.${fileExtension}`);
+            formData.append("video", blob, "recording.webm");
 
             const response = await fetch("http://localhost:9000/api/videos/upload", {
                 method: "POST",
@@ -1141,17 +1082,13 @@ const Videocall = () => {
 
     const downloadRecording = () => {
         if (recordedChunks.length > 0) {
-            // Use appropriate MIME type and extension based on browser
-            const mimeType = isSafari ? "video/mp4" : "video/webm";
-            const fileExtension = isSafari ? "mp4" : "webm";
-            
-            const blob = new Blob(recordedChunks, { type: mimeType });
+            const blob = new Blob(recordedChunks, { type: "video/webm" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             document.body.appendChild(a);
             a.style.display = "none";
             a.href = url;
-            a.download = `screen-recording-${new Date().toISOString()}.${fileExtension}`;
+            a.download = `screen-recording-${new Date().toISOString()}.webm`;
             a.click();
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
@@ -1161,12 +1098,6 @@ const Videocall = () => {
     return (
         <Container className="p-4">
             <h2 className="text-center text-primary mb-4">Agora Web SDK Video Call</h2>
-            {isSafari && (
-                <div className="alert alert-warning mb-3" role="alert">
-                    <strong>Safari Limited Support Notice:</strong> Screen sharing and recording have limited functionality in Safari. 
-                    For best experience, please use Chrome or Edge browser.
-                </div>
-            )}
             <Row className="justify-content-center mb-3">
                 <Col xs="auto">
                     <Button variant="success" onClick={joinChannel} disabled={joinState}>
@@ -1215,6 +1146,8 @@ const Videocall = () => {
                             ></div>
                         </div>
                     </Col>
+
+
                 </Row>
             </div>
 
@@ -1226,3 +1159,4 @@ const Videocall = () => {
 };
 
 export default Videocall;
+
