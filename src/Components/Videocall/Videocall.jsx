@@ -213,11 +213,50 @@ const Videocall = () => {
             const combinedStream = new MediaStream(combinedTracks);
 
             // Set up media recorder with appropriate options
-            const options = {
+            // const options = {
+            //     mimeType: 'video/webm;codecs=vp9',
+            //     videoBitsPerSecond: 3000000, // 3 Mbps
+            //     audioBitsPerSecond: 128000   // 128 kbps for audio
+            // };
+
+            // Set up media recorder with appropriate options based on browser support
+        let options;
+        
+        // Detect Safari
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ||
+            (navigator.userAgent.includes('AppleWebKit') && !navigator.userAgent.includes('Chrome'));
+            
+        if (isSafari) {
+            // Try different MIME types that Safari might support
+            const mimeTypes = [
+                'video/mp4',
+                'video/quicktime',
+                'video/webm',
+                'video/webm;codecs=h264',
+                ''  // Empty string will use browser default
+            ];
+            
+            // Find the first supported MIME type
+            let supportedMimeType = '';
+            for (const type of mimeTypes) {
+                if (type && MediaRecorder.isTypeSupported(type)) {
+                    supportedMimeType = type;
+                    console.log(`Safari supports MIME type: ${supportedMimeType}`);
+                    break;
+                }
+            }
+            
+            options = supportedMimeType ? { mimeType: supportedMimeType } : {};
+            console.log(`Using recorder options for Safari:`, options);
+        } else {
+            // For Chrome, Firefox, Edge etc.
+            options = {
                 mimeType: 'video/webm;codecs=vp9',
                 videoBitsPerSecond: 3000000, // 3 Mbps
                 audioBitsPerSecond: 128000   // 128 kbps for audio
             };
+            console.log(`Using recorder options for non-Safari:`, options);
+        }
 
             const recorder = new MediaRecorder(combinedStream, options);
             let chunks = [];
