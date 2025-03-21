@@ -729,7 +729,8 @@ const Videocall = () => {
 
     const uploadRecording = async (chunks) => {
         try {
-            const blob = new Blob(chunks, { type: "video/webm" });
+            // const blob = new Blob(chunks, { type: "video/webm" });
+            const blob = new Blob(chunks, { type: "video/webm" || 'video/mp4' || 'video/quicktime' || 'video/webm;codecs=h264' });
             const formData = new FormData();
             formData.append("video", blob, "recording.webm");
 
@@ -750,7 +751,8 @@ const Videocall = () => {
 
     const downloadRecording = () => {
         if (recordedChunks.length > 0) {
-            const blob = new Blob(recordedChunks, { type: "video/webm" });
+            // const blob = new Blob(recordedChunks, { type: "video/webm" });
+            const blob = new Blob(recordedChunks, { type: "video/webm" || 'video/mp4' || 'video/quicktime' || 'video/webm;codecs=h264' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             document.body.appendChild(a);
@@ -764,60 +766,7 @@ const Videocall = () => {
     };
 
 
-    //21/3
-
-    // const uploadRecording = async (chunks) => {
-    //     try {
-    //         // Detect Safari
-    //         const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ||
-    //             (navigator.userAgent.includes('AppleWebKit') && !navigator.userAgent.includes('Chrome'));
-                
-    //         // Use the appropriate MIME type
-    //         const blobType = isSafari ? "video/mp4" : "video/webm";
-    //         const fileExtension = isSafari ? "mp4" : "webm";
-            
-    //         const blob = new Blob(chunks, { type: blobType });
-    //         const formData = new FormData();
-    //         formData.append("video", blob, `recording.${fileExtension}`);
-    
-    //         const response = await fetch("http://localhost:9000/api/videos/upload", {
-    //             method: "POST",
-    //             body: formData,
-    //         });
-    
-    //         if (response.ok) {
-    //             console.log("Video uploaded successfully");
-    //         } else {
-    //             console.error("Video upload failed");
-    //         }
-    //     } catch (error) {
-    //         console.error("Error uploading video:", error);
-    //     }
-    // };
-    
-    // const downloadRecording = () => {
-    //     if (recordedChunks.length > 0) {
-    //         // Detect Safari
-    //         const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ||
-    //             (navigator.userAgent.includes('AppleWebKit') && !navigator.userAgent.includes('Chrome'));
-                
-    //         // Use the appropriate MIME type
-    //         const blobType = isSafari ? "video/mp4" : "video/webm";
-    //         const fileExtension = isSafari ? "mp4" : "webm";
-            
-    //         const blob = new Blob(recordedChunks, { type: blobType });
-    //         const url = URL.createObjectURL(blob);
-    //         const a = document.createElement("a");
-    //         document.body.appendChild(a);
-    //         a.style.display = "none";
-    //         a.href = url;
-    //         a.download = `screen-recording-${new Date().toISOString()}.${fileExtension}`;
-    //         a.click();
-    //         window.URL.revokeObjectURL(url);
-    //         document.body.removeChild(a);
-    //     }
-    // };
-
+   
 
     return (
         <Container className="p-4">
