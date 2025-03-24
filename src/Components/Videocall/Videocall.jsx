@@ -220,43 +220,43 @@ const Videocall = () => {
             // };
 
             // Set up media recorder with appropriate options based on browser support
-        let options;
-        
-        // Detect Safari
-        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ||
-            (navigator.userAgent.includes('AppleWebKit') && !navigator.userAgent.includes('Chrome'));
-            
-        if (isSafari) {
-            // Try different MIME types that Safari might support
-            const mimeTypes = [
-                'video/mp4',
-                'video/quicktime',
-                'video/webm',
-                'video/webm;codecs=h264',
-                ''  // Empty string will use browser default
-            ];
-            
-            // Find the first supported MIME type
-            let supportedMimeType = '';
-            for (const type of mimeTypes) {
-                if (type && MediaRecorder.isTypeSupported(type)) {
-                    supportedMimeType = type;
-                    console.log(`Safari supports MIME type: ${supportedMimeType}`);
-                    break;
+            let options;
+
+            // Detect Safari
+            const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ||
+                (navigator.userAgent.includes('AppleWebKit') && !navigator.userAgent.includes('Chrome'));
+
+            if (isSafari) {
+                // Try different MIME types that Safari might support
+                const mimeTypes = [
+                    'video/mp4',
+                    'video/quicktime',
+                    'video/webm',
+                    'video/webm;codecs=h264',
+                    ''  // Empty string will use browser default
+                ];
+
+                // Find the first supported MIME type
+                let supportedMimeType = '';
+                for (const type of mimeTypes) {
+                    if (type && MediaRecorder.isTypeSupported(type)) {
+                        supportedMimeType = type;
+                        console.log(`Safari supports MIME type: ${supportedMimeType}`);
+                        break;
+                    }
                 }
+
+                options = supportedMimeType ? { mimeType: supportedMimeType } : {};
+                console.log(`Using recorder options for Safari:`, options);
+            } else {
+                // For Chrome, Firefox, Edge etc.
+                options = {
+                    mimeType: 'video/webm;codecs=vp9',
+                    videoBitsPerSecond: 3000000, // 3 Mbps
+                    audioBitsPerSecond: 128000   // 128 kbps for audio
+                };
+                console.log(`Using recorder options for non-Safari:`, options);
             }
-            
-            options = supportedMimeType ? { mimeType: supportedMimeType } : {};
-            console.log(`Using recorder options for Safari:`, options);
-        } else {
-            // For Chrome, Firefox, Edge etc.
-            options = {
-                mimeType: 'video/webm;codecs=vp9',
-                videoBitsPerSecond: 3000000, // 3 Mbps
-                audioBitsPerSecond: 128000   // 128 kbps for audio
-            };
-            console.log(`Using recorder options for non-Safari:`, options);
-        }
 
             const recorder = new MediaRecorder(combinedStream, options);
             let chunks = [];
@@ -300,134 +300,132 @@ const Videocall = () => {
         }
     };
 
-//21/3
+    // const startRecording = async (videoStream, audioStream, backgroundAudioStream) => {
+    //     try {
+    //         // Create audio mixer for multiple audio sources
+    //         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    //         const audioDestination = audioContext.createMediaStreamDestination();
 
-// const startRecording = async (videoStream, audioStream, backgroundAudioStream) => {
-//     try {
-//         // Create audio mixer for multiple audio sources
-//         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-//         const audioDestination = audioContext.createMediaStreamDestination();
+    //         // Get all video tracks from the screen capture
+    //         const videoTracks = videoStream.getVideoTracks();
 
-//         // Get all video tracks from the screen capture
-//         const videoTracks = videoStream.getVideoTracks();
+    //         // Get microphone audio track if available
+    //         const micTracks = audioStream.getAudioTracks();
+    //         if (micTracks.length > 0) {
+    //             console.log("Adding microphone audio to recording");
+    //             const micSource = audioContext.createMediaStreamSource(new MediaStream([micTracks[0]]));
+    //             micSource.connect(audioDestination);
+    //         }
 
-//         // Get microphone audio track if available
-//         const micTracks = audioStream.getAudioTracks();
-//         if (micTracks.length > 0) {
-//             console.log("Adding microphone audio to recording");
-//             const micSource = audioContext.createMediaStreamSource(new MediaStream([micTracks[0]]));
-//             micSource.connect(audioDestination);
-//         }
+    //         // Add background audio track if available
+    //         if (backgroundAudioStream && backgroundAudioStream.getAudioTracks().length > 0) {
+    //             console.log("Adding background audio to recording mixer");
+    //             const backgroundSource = audioContext.createMediaStreamSource(backgroundAudioStream);
+    //             backgroundSource.connect(audioDestination);
+    //         } else {
+    //             console.warn("No background audio tracks available for recording");
+    //         }
 
-//         // Add background audio track if available
-//         if (backgroundAudioStream && backgroundAudioStream.getAudioTracks().length > 0) {
-//             console.log("Adding background audio to recording mixer");
-//             const backgroundSource = audioContext.createMediaStreamSource(backgroundAudioStream);
-//             backgroundSource.connect(audioDestination);
-//         } else {
-//             console.warn("No background audio tracks available for recording");
-//         }
+    //         // Create a combined stream with video track and mixed audio
+    //         const combinedTracks = [
+    //             ...videoTracks,
+    //             ...audioDestination.stream.getAudioTracks()
+    //         ];
 
-//         // Create a combined stream with video track and mixed audio
-//         const combinedTracks = [
-//             ...videoTracks,
-//             ...audioDestination.stream.getAudioTracks()
-//         ];
+    //         // Log all tracks being used for recording
+    //         console.log(`Recording with ${combinedTracks.length} tracks:`);
+    //         combinedTracks.forEach((track, index) => {
+    //             console.log(`Track ${index}: ${track.kind} - ${track.readyState} - ${track.label}`);
+    //         });
 
-//         // Log all tracks being used for recording
-//         console.log(`Recording with ${combinedTracks.length} tracks:`);
-//         combinedTracks.forEach((track, index) => {
-//             console.log(`Track ${index}: ${track.kind} - ${track.readyState} - ${track.label}`);
-//         });
+    //         const combinedStream = new MediaStream(combinedTracks);
 
-//         const combinedStream = new MediaStream(combinedTracks);
+    //         // Set up media recorder with appropriate options based on browser support
+    //         let options;
 
-//         // Set up media recorder with appropriate options based on browser support
-//         let options;
-        
-//         // Detect Safari
-//         const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ||
-//             (navigator.userAgent.includes('AppleWebKit') && !navigator.userAgent.includes('Chrome'));
-            
-//         if (isSafari) {
-//             // Try different MIME types that Safari might support
-//             const mimeTypes = [
-//                 'video/mp4',
-//                 'video/quicktime',
-//                 'video/webm',
-//                 'video/webm;codecs=h264',
-//                 ''  // Empty string will use browser default
-//             ];
-            
-//             // Find the first supported MIME type
-//             let supportedMimeType = '';
-//             for (const type of mimeTypes) {
-//                 if (type && MediaRecorder.isTypeSupported(type)) {
-//                     supportedMimeType = type;
-//                     console.log(`Safari supports MIME type: ${supportedMimeType}`);
-//                     break;
-//                 }
-//             }
-            
-//             options = supportedMimeType ? { mimeType: supportedMimeType } : {};
-//             console.log(`Using recorder options for Safari:`, options);
-//         } else {
-//             // For Chrome, Firefox, Edge etc.
-//             options = {
-//                 mimeType: 'video/webm;codecs=vp9',
-//                 videoBitsPerSecond: 3000000, // 3 Mbps
-//                 audioBitsPerSecond: 128000   // 128 kbps for audio
-//             };
-//             console.log(`Using recorder options for non-Safari:`, options);
-//         }
+    //         // Detect Safari
+    //         const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ||
+    //             (navigator.userAgent.includes('AppleWebKit') && !navigator.userAgent.includes('Chrome'));
 
-//         const recorder = new MediaRecorder(combinedStream, options);
-//         let chunks = [];
+    //         if (isSafari) {
+    //             // Try different MIME types that Safari might support
+    //             const mimeTypes = [
+    //                 'video/mp4',
+    //                 'video/quicktime',
+    //                 'video/webm',
+    //                 'video/webm;codecs=h264',
+    //                 ''  // Empty string will use browser default
+    //             ];
 
-//         recorder.ondataavailable = (event) => {
-//             if (event.data.size > 0) {
-//                 chunks.push(event.data);
-//                 console.log("Recording data available, chunk size:", event.data.size);
-//             }
-//         };
+    //             // Find the first supported MIME type
+    //             let supportedMimeType = '';
+    //             for (const type of mimeTypes) {
+    //                 if (type && MediaRecorder.isTypeSupported(type)) {
+    //                     supportedMimeType = type;
+    //                     console.log(`Safari supports MIME type: ${supportedMimeType}`);
+    //                     break;
+    //                 }
+    //             }
 
-//         recorder.onstop = () => {
-//             console.log("Recorder stopped, creating file from chunks:", chunks.length);
+    //             options = supportedMimeType ? { mimeType: supportedMimeType } : {};
+    //             console.log(`Using recorder options for Safari:`, options);
+    //         } else {
+    //             // For Chrome, Firefox, Edge etc.
+    //             options = {
+    //                 mimeType: 'video/webm;codecs=vp9',
+    //                 videoBitsPerSecond: 3000000, // 3 Mbps
+    //                 audioBitsPerSecond: 128000   // 128 kbps for audio
+    //             };
+    //             console.log(`Using recorder options for non-Safari:`, options);
+    //         }
 
-//             if (chunks.length > 0) {
-//                 // Determine the correct MIME type for the blob
-//                 let blobType = "video/webm";
-//                 if (isSafari) {
-//                     blobType = recorder.mimeType || "video/mp4";
-//                 }
-                
-//                 const blob = new Blob(chunks, { type: blobType });
-//                 setRecordedChunks(chunks);
+    //         const recorder = new MediaRecorder(combinedStream, options);
+    //         let chunks = [];
 
-//                 // Create download link
-//                 const url = URL.createObjectURL(blob);
-//                 setRecordingLink(url);
+    //         recorder.ondataavailable = (event) => {
+    //             if (event.data.size > 0) {
+    //                 chunks.push(event.data);
+    //                 console.log("Recording data available, chunk size:", event.data.size);
+    //             }
+    //         };
 
-//                 // Upload if your server is ready
-//                 uploadRecording(chunks);
-//             }
+    //         recorder.onstop = () => {
+    //             console.log("Recorder stopped, creating file from chunks:", chunks.length);
 
-//             // Close audio context used for recording
-//             if (audioContext && audioContext.state !== 'closed') {
-//                 audioContext.close().catch(e => console.error("Error closing audio context:", e));
-//             }
-//         };
+    //             if (chunks.length > 0) {
+    //                 // Determine the correct MIME type for the blob
+    //                 let blobType = "video/webm";
+    //                 if (isSafari) {
+    //                     blobType = recorder.mimeType || "video/mp4";
+    //                 }
 
-//         // Start recording with 1-second data chunks
-//         recorder.start(1000);
-//         setMediaRecorder(recorder);
-//         setIsRecording(true);
-//         console.log("Recording started with background audio");
-//     } catch (error) {
-//         console.error("Error starting recording:", error);
-//         alert("Failed to start recording: " + error.message);
-//     }
-// };
+    //                 const blob = new Blob(chunks, { type: blobType });
+    //                 setRecordedChunks(chunks);
+
+    //                 // Create download link
+    //                 const url = URL.createObjectURL(blob);
+    //                 setRecordingLink(url);
+
+    //                 // Upload if your server is ready
+    //                 uploadRecording(chunks);
+    //             }
+
+    //             // Close audio context used for recording
+    //             if (audioContext && audioContext.state !== 'closed') {
+    //                 audioContext.close().catch(e => console.error("Error closing audio context:", e));
+    //             }
+    //         };
+
+    //         // Start recording with 1-second data chunks
+    //         recorder.start(1000);
+    //         setMediaRecorder(recorder);
+    //         setIsRecording(true);
+    //         console.log("Recording started with background audio");
+    //     } catch (error) {
+    //         console.error("Error starting recording:", error);
+    //         alert("Failed to start recording: " + error.message);
+    //     }
+    // };
 
     const joinChannel = async () => {
         try {
@@ -454,10 +452,17 @@ const Videocall = () => {
             console.log("Join and publish success!");
         } catch (error) {
             console.error("Error joining channel:", error);
-            alert("Failed to join channel: " + error.message);
+            if (error.name === "NotReadableError" || error.name === "NotAllowedError") {
+                alert("Camera access error: Please ensure your camera is not being used by another application and you've granted camera permissions.");
+            } else {
+                alert("Failed to join channel: " + error.message);
+            }
+            
+            // console.error("Error joining channel:", error);
+            // alert("Failed to join channel: " + error.message);
         }
     };
-    
+
     // 19/3 final 
     const startScreenSharing = async () => {
         try {
@@ -467,7 +472,7 @@ const Videocall = () => {
             const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ||
                 (navigator.userAgent.includes('AppleWebKit') && !navigator.userAgent.includes('Chrome'));
             console.log("Browser detected as Safari:", isSafari);
-            
+
 
             //21/3
             if (isSafari) {
@@ -476,63 +481,63 @@ const Videocall = () => {
                     const screenTrack = await AgoraRTC.createScreenVideoTrack({
                         encoderConfig: "1080p_1",  // Set the resolution to 1080p
                     }, "disable");  // "disable" to avoid creating audio track together with screen video track
-            
+
                     // Unpublish the camera track before starting screen sharing
                     if (localVideoTrack) {
                         console.log("Unpublishing camera track before screen sharing");
                         await client.unpublish(localVideoTrack);
                     }
-            
+
                     // Set the local screen track to the state
                     setLocalScreenTrack(screenTrack);
-            
+
                     // Publish the screen track
                     console.log("Publishing screen track");
                     await client.publish(screenTrack);
-            
+
                     // Play the screen track in the screen container
                     if (screenContainerRef.current) {
                         screenContainerRef.current.innerHTML = "";
                         screenTrack.play(screenContainerRef.current);
                     }
-            
+
                     // Even though the camera track is unpublished, we can still show the local video
                     if (localVideoTrack && videoContainerRef.current) {
                         localVideoTrack.play(videoContainerRef.current);
                     }
-            
+
                     // Start the background audio - must be started before recording
                     console.log("Starting background audio for recording");
                     const backgroundAudioStream = await startBackgroundAudio();
-            
+
                     // Wait a moment to ensure background audio is playing
                     await new Promise(resolve => setTimeout(resolve, 500));
-            
+
                     // Get the screen video stream from the screen track
                     const screenMediaTrack = screenTrack.getMediaStreamTrack();
                     const screenStream = new MediaStream([screenMediaTrack]);
-            
+
                     // Get the microphone audio stream if it's available
                     const micStream = new MediaStream([localAudioTrack.getMediaStreamTrack()]);
-            
+
                     // Start recording with all streams: screen, microphone, and background audio
                     console.log("Starting recording with background audio");
                     startRecording(screenStream, micStream, backgroundAudioStream);
-            
+
                     // Update state to indicate screen sharing has started
                     setIsScreenSharing(true);
                     console.log("Screen sharing started!");
-            
+
                     // Handle when screen sharing ends
                     screenTrack.on("track-ended", () => {
                         console.log("Screen track ended event received");
                         stopScreenSharing();
                     });
-            
+
                 } catch (error) {
                     console.error("Error during screen sharing process:", error);
                 }
-            }            
+            }
             else {
                 // Non-Safari browsers (Chrome, Edge, etc.)
                 console.log("Using configuration for non-Safari browsers");
@@ -766,7 +771,7 @@ const Videocall = () => {
     };
 
 
-   
+
 
     return (
         <Container className="p-4">
