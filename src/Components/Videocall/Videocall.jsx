@@ -299,7 +299,7 @@ const Videocall = () => {
             console.log("Recording started with background audio");
         } catch (error) {
             console.error("Error starting recording:", error);
-            alert("Failed to start recording: " + error.message);
+            // alert("Failed to start recording: " + error.message);
         }
     };
 
@@ -456,9 +456,11 @@ const Videocall = () => {
         } catch (error) {
             console.error("Error joining channel:", error);
             if (error.name === "NotReadableError" || error.name === "NotAllowedError") {
-                alert("Camera access error: Please ensure your camera is not being used by another application and you've granted camera permissions.");
+                console.error("Camera access error: Please ensure your camera is not being used by another application and you've granted camera permissions.");
+                // alert("Camera access error: Please ensure your camera is not being used by another application and you've granted camera permissions.");
             } else {
-                alert("Failed to join channel: " + error.message);
+                console.error("Failed to join channel: " + error.message);
+                // alert("Failed to join channel: " + error.message);
             }
 
             // console.error("Error joining channel:", error);
@@ -635,7 +637,7 @@ const Videocall = () => {
             }
         } catch (error) {
             console.error("Error starting screen sharing:", error);
-            alert("Failed to start screen sharing: " + error.message);
+            // alert("Failed to start screen sharing: " + error.message);
 
             // If screen sharing fails, republish camera track
             if (localVideoTrack) {
@@ -736,16 +738,16 @@ const Videocall = () => {
         try {
             // Prevent multiple simultaneous stop calls
             if (!isScreenSharing) return;
-    
+
             // Stop background audio
             stopBackgroundAudio();
-    
+
             // Stop media recorder first
             if (mediaRecorder && mediaRecorder.state !== "inactive") {
                 mediaRecorder.stop();
                 setMediaRecorder(null);
             }
-    
+
             // Stop and unpublish screen track
             if (localScreenTrack) {
                 try {
@@ -757,12 +759,12 @@ const Videocall = () => {
                 }
                 setLocalScreenTrack(null);
             }
-    
+
             // Publish camera track back
             if (localVideoTrack) {
                 try {
                     await client.publish(localVideoTrack);
-    
+
                     // Play local video track
                     if (videoContainerRef.current) {
                         videoContainerRef.current.innerHTML = "";
@@ -774,7 +776,7 @@ const Videocall = () => {
                     try {
                         const newVideoTrack = await AgoraRTC.createCameraVideoTrack();
                         await client.publish(newVideoTrack);
-    
+
                         setLocalVideoTrack(newVideoTrack);
                         if (videoContainerRef.current) {
                             videoContainerRef.current.innerHTML = "";
@@ -782,21 +784,21 @@ const Videocall = () => {
                         }
                     } catch (recreateError) {
                         console.error("Failed to recreate video track:", recreateError);
-                        alert("Could not restore camera track. Please rejoin the channel.");
+                        // alert("Could not restore camera track. Please rejoin the channel.");
                     }
                 }
             }
-    
+
             // Process recorded chunks - Moved this outside the if block
             if (recordedChunks.length > 0) {
                 const blob = new Blob(recordedChunks, { type: "video/webm" });
                 setRecordingLink(URL.createObjectURL(blob));
             }
-    
+
             // Reset states
             setIsScreenSharing(false);
             setIsRecording(false);
-    
+
             console.log("Screen sharing stopped successfully!");
         } catch (error) {
             console.error("Error stopping screen sharing:", error);
@@ -805,7 +807,7 @@ const Videocall = () => {
             stopBackgroundAudio();
             setIsScreenSharing(false);
             setIsRecording(false);
-            
+
             // Ensure recording link is set if there are chunks
             if (recordedChunks.length > 0 && !recordingLink) {
                 const blob = new Blob(recordedChunks, { type: "video/webm" });
@@ -813,8 +815,48 @@ const Videocall = () => {
             }
         }
     };
-    
+
+    // const leaveChannel = async () => {
+    //     if (joinState) {
+    //         if (isScreenSharing) {
+    //             await stopScreenSharing();
+    //         }
+
+    //         if (localVideoTrack) {
+    //             localVideoTrack.stop();
+    //             localVideoTrack.close();
+    //             setLocalVideoTrack(null);
+    //         }
+
+    //         if (localAudioTrack) {
+    //             localAudioTrack.stop();
+    //             localAudioTrack.close();
+    //             setLocalAudioTrack(null);
+    //         }
+
+    //         const remoteContainer = document.getElementById("remote-container");
+    //         if (remoteContainer) {
+    //             remoteContainer.innerHTML = "";
+    //         }
+
+    //         await client.leave();
+    //         console.log("Left the channel.");
+    //         setJoinState(false);
+
+    //         if (mediaRecorder && mediaRecorder.state !== "inactive") {
+    //             mediaRecorder.stop();
+    //         }
+
+    //         // Hide Download button when Camera Off is clicked
+    //         setRecordingLink(null);
+
+    //         // Make sure audio is stopped
+    //         stopBackgroundAudio();
+    //     }
+    // };
+
     //25/3
+
     const leaveChannel = async () => {
         if (joinState) {
             if (isScreenSharing) {
@@ -889,6 +931,14 @@ const Videocall = () => {
             a.click();
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
+            // setRecordingLink(null) ne reset karva
+            setRecordingLink(null);
+
+            // Page ne refresh karva mate
+            setTimeout(() => {
+                window.location.reload();
+            }, 500); // 500ms delay rakhi sakay jo jaruri hoy
+
         }
     };
 
@@ -921,7 +971,7 @@ const Videocall = () => {
                         Camera Off
                     </Button>
                 </Col>
-                {recordingLink  && (
+                {recordingLink && (
                     <Col xs="auto">
                         <Button variant="success" onClick={downloadRecording}>
                             Download Recording
