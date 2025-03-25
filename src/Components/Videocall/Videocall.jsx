@@ -18,6 +18,8 @@ const Videocall = () => {
     const [isRecording, setIsRecording] = useState(false);
     const [recordingLink, setRecordingLink] = useState(null);
 
+    console.log(recordingLink)
+
     // Audio player reference
     const audioRef = useRef(new Audio(backAudio));
     const audioContextRef = useRef(null);
@@ -69,6 +71,7 @@ const Videocall = () => {
             stopBackgroundAudio();
         };
     }, []);
+
 
     const setupIntervalAudio = () => {
         try {
@@ -457,7 +460,7 @@ const Videocall = () => {
             } else {
                 alert("Failed to join channel: " + error.message);
             }
-            
+
             // console.error("Error joining channel:", error);
             // alert("Failed to join channel: " + error.message);
         }
@@ -649,50 +652,169 @@ const Videocall = () => {
         }
     };
 
+    //25/3
+    // const stopScreenSharing = async () => {
+    //     console.log("Stopping screen sharing...");
+    //     try {
+    //         // Prevent multiple simultaneous stop calls
+    //         if (!isScreenSharing) return;
+
+    //         // Stop background audio
+    //         stopBackgroundAudio();
+
+    //         // Stop media recorder first
+    //         if (mediaRecorder && mediaRecorder.state !== "inactive") {
+    //             mediaRecorder.stop();
+    //             setMediaRecorder(null);
+    //         }
+
+    //         // Stop and unpublish screen track
+    //         if (localScreenTrack) {
+    //             try {
+    //                 await client.unpublish(localScreenTrack);
+    //                 localScreenTrack.stop();
+    //                 localScreenTrack.close();
+    //             } catch (unpublishError) {
+    //                 console.error("Error unpublishing screen track:", unpublishError);
+    //             }
+    //             setLocalScreenTrack(null);
+    //         }
+
+    //         // Publish camera track back
+    //         if (localVideoTrack) {
+    //             try {
+    //                 await client.publish(localVideoTrack);
+
+    //                 // Play local video track
+    //                 if (videoContainerRef.current) {
+    //                     videoContainerRef.current.innerHTML = "";
+    //                     localVideoTrack.play(videoContainerRef.current);
+    //                 }
+    //             } catch (publishError) {
+    //                 console.error("Error republishing camera track:", publishError);
+
+    //                 // Fallback: recreate video track
+    //                 try {
+    //                     const newVideoTrack = await AgoraRTC.createCameraVideoTrack();
+    //                     await client.publish(newVideoTrack);
+
+    //                     setLocalVideoTrack(newVideoTrack);
+    //                     if (videoContainerRef.current) {
+    //                         videoContainerRef.current.innerHTML = "";
+    //                         newVideoTrack.play(videoContainerRef.current);
+    //                     }
+    //                 } catch (recreateError) {
+    //                     console.error("Failed to recreate video track:", recreateError);
+    //                     alert("Could not restore camera track. Please rejoin the channel.");
+    //                 }
+    //             }
+    //         }
+
+    //         // Process recorded chunks
+    //         if (recordedChunks.length > 0) {
+    //             const blob = new Blob(recordedChunks, { type: "video/webm" });
+    //             setRecordingLink(URL.createObjectURL(blob));
+    //         }
+
+    //         // Reset states
+    //         setIsScreenSharing(false);
+    //         setIsRecording(false);
+
+    //         console.log("Screen sharing stopped successfully!");
+    //     } catch (error) {
+    //         console.error("Error stopping screen sharing:", error);
+    //     } finally {
+    //         // Ensure states are reset
+    //         stopBackgroundAudio();
+    //         setIsScreenSharing(false);
+    //         setIsRecording(false);
+    //     }
+    // };
+
     const stopScreenSharing = async () => {
         console.log("Stopping screen sharing...");
         try {
+            // Prevent multiple simultaneous stop calls
+            if (!isScreenSharing) return;
+    
             // Stop background audio
             stopBackgroundAudio();
-
-            if (localScreenTrack) {
-                await client.unpublish(localScreenTrack);
-                localScreenTrack.stop();
-                localScreenTrack.close();
-                setLocalScreenTrack(null);
-            }
-
-            if (localVideoTrack) {
-                await client.publish(localVideoTrack);
-                if (videoContainerRef.current) {
-                    localVideoTrack.play(videoContainerRef.current);
-                }
-            }
-
+    
+            // Stop media recorder first
             if (mediaRecorder && mediaRecorder.state !== "inactive") {
                 mediaRecorder.stop();
                 setMediaRecorder(null);
             }
-
-            setIsScreenSharing(false);
-            setIsRecording(false);
-
-            // Show Download button
+    
+            // Stop and unpublish screen track
+            if (localScreenTrack) {
+                try {
+                    await client.unpublish(localScreenTrack);
+                    localScreenTrack.stop();
+                    localScreenTrack.close();
+                } catch (unpublishError) {
+                    console.error("Error unpublishing screen track:", unpublishError);
+                }
+                setLocalScreenTrack(null);
+            }
+    
+            // Publish camera track back
+            if (localVideoTrack) {
+                try {
+                    await client.publish(localVideoTrack);
+    
+                    // Play local video track
+                    if (videoContainerRef.current) {
+                        videoContainerRef.current.innerHTML = "";
+                        localVideoTrack.play(videoContainerRef.current);
+                    }
+                } catch (publishError) {
+                    console.error("Error republishing camera track:", publishError);
+                    // Fallback: recreate video track
+                    try {
+                        const newVideoTrack = await AgoraRTC.createCameraVideoTrack();
+                        await client.publish(newVideoTrack);
+    
+                        setLocalVideoTrack(newVideoTrack);
+                        if (videoContainerRef.current) {
+                            videoContainerRef.current.innerHTML = "";
+                            newVideoTrack.play(videoContainerRef.current);
+                        }
+                    } catch (recreateError) {
+                        console.error("Failed to recreate video track:", recreateError);
+                        alert("Could not restore camera track. Please rejoin the channel.");
+                    }
+                }
+            }
+    
+            // Process recorded chunks - Moved this outside the if block
             if (recordedChunks.length > 0) {
                 const blob = new Blob(recordedChunks, { type: "video/webm" });
                 setRecordingLink(URL.createObjectURL(blob));
             }
-
+    
+            // Reset states
+            setIsScreenSharing(false);
+            setIsRecording(false);
+    
             console.log("Screen sharing stopped successfully!");
         } catch (error) {
             console.error("Error stopping screen sharing:", error);
-            alert("Error stopping screen sharing: " + error.message);
-
-            // Make sure audio stops even if there's an error
+        } finally {
+            // Ensure states are reset
             stopBackgroundAudio();
+            setIsScreenSharing(false);
+            setIsRecording(false);
+            
+            // Ensure recording link is set if there are chunks
+            if (recordedChunks.length > 0 && !recordingLink) {
+                const blob = new Blob(recordedChunks, { type: "video/webm" });
+                setRecordingLink(URL.createObjectURL(blob));
+            }
         }
     };
-
+    
+    //25/3
     const leaveChannel = async () => {
         if (joinState) {
             if (isScreenSharing) {
@@ -724,8 +846,8 @@ const Videocall = () => {
                 mediaRecorder.stop();
             }
 
-            // Hide Download button when Camera Off is clicked
-            setRecordingLink(null);
+            // Do not hide the download button when Camera Off is clicked
+            // setRecordingLink(null);
 
             // Make sure audio is stopped
             stopBackgroundAudio();
@@ -770,9 +892,6 @@ const Videocall = () => {
         }
     };
 
-
-
-
     return (
         <Container className="p-4">
             <h2 className="text-center text-primary mb-4">Agora Web SDK Video Call</h2>
@@ -802,7 +921,7 @@ const Videocall = () => {
                         Camera Off
                     </Button>
                 </Col>
-                {recordingLink && isScreenSharing === false && (
+                {recordingLink  && (
                     <Col xs="auto">
                         <Button variant="success" onClick={downloadRecording}>
                             Download Recording
